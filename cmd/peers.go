@@ -1,23 +1,34 @@
-package main
+package gokv
 
 import (
-	"errors"
-	"log"
+	"fmt"
 	"net"
 )
 
+type Peer struct {
+	conn  net.Conn
+	msgCh chan Message
+}
+
 // acceptPeer accepts TCP connections until ln is closed or returns a non-recoverable error.
 // Each connection is handled in its own goroutine via handle.
-func acceptPeer(ln net.Listener, handle func(net.Conn)) {
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			if errors.Is(err, net.ErrClosed) {
-				return
-			}
-			log.Printf("accept peer: %v", err)
-			continue
-		}
-		go handle(conn)
+func NewPeer(conn net.Conn, msgCh chan Message) *Peer {
+	return &Peer{
+		conn:  conn,
+		msgCh: msgCh,
 	}
+}
+
+func (p *Peer) readLoop() error {
+	buf := make([]byte, 1024)
+	for {
+		n, err := p.conn.Read(buf)
+		if err != nil {
+			break
+		}
+
+		data := buf[:n]
+		fmt.Println(string(data))
+	}
+	return fmt.Errorf("connection closed")
 }
