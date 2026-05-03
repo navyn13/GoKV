@@ -25,7 +25,9 @@ func main() {
 		Password:   os.Getenv("PASSWORD"),
 	})
 	go func() {
-		log.Fatal(server.Start())
+		if err := server.Start(); err != nil {
+			log.Fatal(err)
+		}
 	}()
 
 	quit := make(chan os.Signal, 1)

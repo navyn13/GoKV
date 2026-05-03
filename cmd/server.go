@@ -1,6 +1,8 @@
 package gokv
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"log/slog"
 	"net"
@@ -18,6 +20,7 @@ type Server struct {
 	addPeerCh chan *Peer
 	peers     map[*Peer]bool
 	quitCh    chan struct{}
+	kv        *KV
 }
 type Message struct {
 	cmd  Command
@@ -30,6 +33,8 @@ func NewServer(cfg Config) *Server {
 		msgCh:     make(chan Message),
 		peers:     make(map[*Peer]bool),
 		addPeerCh: make(chan *Peer),
+		quitCh:    make(chan struct{}),
+		kv:        NewKV(),
 	}
 }
 
@@ -59,6 +64,22 @@ func (s *Server) loop() {
 	}
 }
 func (s *Server) handleMessage(msg Message) error {
+	switch v := msg.cmd.(type) {
+	case SetCommand:
+		s.kv.Set(v.key, v.val)
+
+	case DeleteCommand:
+		s.kv.Delete(v.key)
+	case GetCommand:
+		val, ok := s.kv.Get(v.key)
+		if !ok {
+			return fmt.Errorf("key not found")
+		}
+		_, err := msg.peer.Send(val)
+		if err != nil {
+			slog.Error("peer send error", "err", err)
+		}
+	}
 	return nil
 }
 
@@ -66,8 +87,10 @@ func (s *Server) acceptLoop() error {
 	for {
 		conn, err := s.ln.Accept()
 		if err != nil {
-			log.Fatal(err)
-			continue
+			if errors.Is(err, net.ErrClosed) {
+				return nil
+			}
+			return err
 		}
 		go s.handleConn(conn)
 	}
