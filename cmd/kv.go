@@ -1,6 +1,9 @@
 package gokv
 
-import "sync"
+import (
+	"os"
+	"sync"
+)
 
 type KV struct {
 	mu   sync.RWMutex
@@ -32,4 +35,8 @@ func (kv *KV) Get(key []byte) ([]byte, bool) {
 	defer kv.mu.RUnlock()
 	val, ok := kv.data[string(key)]
 	return val, ok
+}
+
+func (kv *KV) Auth(username, password string) bool {
+	return username == os.Getenv("USERNAME") && password == os.Getenv("PASSWORD")
 }

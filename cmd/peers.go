@@ -9,16 +9,18 @@ import (
 )
 
 type Peer struct {
-	conn  net.Conn
-	msgCh chan Message
+	conn   net.Conn
+	msgCh  chan Message
+	isAuth bool
 }
 
 // acceptPeer accepts TCP connections until ln is closed or returns a non-recoverable error.
 // Each connection is handled in its own goroutine via handle.
 func NewPeer(conn net.Conn, msgCh chan Message) *Peer {
 	return &Peer{
-		conn:  conn,
-		msgCh: msgCh,
+		conn:   conn,
+		msgCh:  msgCh,
+		isAuth: false,
 	}
 }
 

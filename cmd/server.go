@@ -2,7 +2,6 @@ package gokv
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"log/slog"
 	"net"
@@ -64,17 +63,36 @@ func (s *Server) loop() {
 	}
 }
 func (s *Server) handleMessage(msg Message) error {
+	if _, isAuth := msg.cmd.(AuthCommand); !isAuth {
+		if !msg.peer.isAuth {
+			msg.peer.conn.Write([]byte("-NOAUTH Authentication required - AUTH {USERNAME} {PASSWORD}\r\n"))
+			return nil
+		}
+	}
 	switch v := msg.cmd.(type) {
+	case AuthCommand:
+		isAuthenticated := s.kv.Auth(v.username, v.password)
+		msg.peer.isAuth = isAuthenticated
+		var val []byte
+		if !isAuthenticated {
+			val = []byte("Not Authenticated")
+		} else {
+			val = []byte("Authenticated")
+		}
+		_, err := msg.peer.Send(val)
+		if err != nil {
+			slog.Error("peer send error", "err", err)
+		}
 	case SetCommand:
 		s.kv.Set(v.key, v.val)
-
 	case DeleteCommand:
 		s.kv.Delete(v.key)
 	case GetCommand:
 		val, ok := s.kv.Get(v.key)
 		if !ok {
-			return fmt.Errorf("key not found")
+			val = []byte("key not found")
 		}
+
 		_, err := msg.peer.Send(val)
 		if err != nil {
 			slog.Error("peer send error", "err", err)
