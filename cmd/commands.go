@@ -15,8 +15,6 @@ const (
 	CommandIncr = "INCR"
 	//commandDecr is the DECR command identifier
 	CommandDecr = "DECR"
-	//commandAppend is the APPEND command identifier
-	CommandAppend = "APPEND"
 )
 
 // Command represents a BlinkDB command interface
@@ -57,10 +55,4 @@ type IncrCommand struct {
 // DecrCommand represents a DECR command
 type DecrCommand struct {
 	key []byte
-}
-
-// AppendCommand represents an APPEND command
-type AppendCommand struct {
-	key     []byte
-	content []byte
 }
