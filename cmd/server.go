@@ -109,6 +109,26 @@ func (s *Server) handleMessage(msg Message) error {
 		if err != nil {
 			slog.Error("peer send error", "err", err)
 		}
+	case IncrCommand:
+		incr, err := s.kv.Incr(v.key)
+		if err != nil {
+			slog.Error("incr error", "err", err)
+		}
+		data := []byte(strconv.Itoa(incr))
+		_, err = msg.peer.Send(data)
+		if err != nil {
+			slog.Error("peer send error", "err", err)
+		}
+	case DecrCommand:
+		decr, err := s.kv.Decr(v.key)
+		if err != nil {
+			slog.Error("decr error", "err", err)
+		}
+		data := []byte(strconv.Itoa(decr))
+		_, err = msg.peer.Send(data)
+		if err != nil {
+			slog.Error("peer send error", "err", err)
+		}
 	}
 
 	return nil

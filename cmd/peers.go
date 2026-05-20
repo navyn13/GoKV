@@ -92,11 +92,22 @@ func (p *Peer) readLoop() error {
 					cmd:  cmd,
 					peer: p,
 				}
-			case CommandExist:
+			case CommandIncr:
 				if len(v.Array()) != 2 {
 					return fmt.Errorf("invalid number of variables Exist command")
 				}
-				cmd := ExistCommand{
+				cmd := IncrCommand{
+					key: v.Array()[1].Bytes(),
+				}
+				p.msgCh <- Message{
+					cmd:  cmd,
+					peer: p,
+				}
+			case CommandDecr:
+				if len(v.Array()) != 2 {
+					return fmt.Errorf("invalid number of variables Exist command")
+				}
+				cmd := DecrCommand{
 					key: v.Array()[1].Bytes(),
 				}
 				p.msgCh <- Message{

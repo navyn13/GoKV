@@ -2,6 +2,7 @@ package gokv
 
 import (
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -48,4 +49,30 @@ func (kv *KV) Exist(key []byte) (int, error) {
 		return 0, nil
 	}
 	return 1, nil
+}
+
+func (kv *KV) Incr(key []byte) (int, error) {
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
+
+	val, err := strconv.Atoi(string(kv.data[string(key)]))
+	if err != nil {
+		return 0, err
+	}
+	val++
+	kv.data[string(key)] = []byte(strconv.Itoa(val))
+	return val, nil
+}
+
+func (kv *KV) Decr(key []byte) (int, error) {
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
+
+	val, err := strconv.Atoi(string(kv.data[string(key)]))
+	if err != nil {
+		return 0, err
+	}
+	val--
+	kv.data[string(key)] = []byte(strconv.Itoa(val))
+	return val, nil
 }
