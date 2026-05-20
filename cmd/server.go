@@ -5,6 +5,7 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"strconv"
 )
 
 type Config struct {
@@ -97,7 +98,19 @@ func (s *Server) handleMessage(msg Message) error {
 		if err != nil {
 			slog.Error("peer send error", "err", err)
 		}
+	case ExistCommand:
+		isExist, err := s.kv.Exist(v.key)
+		if err != nil {
+			slog.Error("exist error", "err", err)
+		}
+
+		data := []byte(strconv.Itoa(isExist))
+		_, err = msg.peer.Send(data)
+		if err != nil {
+			slog.Error("peer send error", "err", err)
+		}
 	}
+
 	return nil
 }
 

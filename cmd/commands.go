@@ -9,6 +9,14 @@ const (
 	CommandAuth = "AUTH"
 	// CommandDelete is the DELETE command identifier
 	CommandDelete = "DELETE"
+	// CommandExist is the EXIST command identifier
+	CommandExist = "EXIST"
+	//commandIncr is the INCR command identifier
+	CommandIncr = "INCR"
+	//commandDecr is the DECR command identifier
+	CommandDecr = "DECR"
+	//commandAppend is the APPEND command identifier
+	CommandAppend = "APPEND"
 )
 
 // Command represents a BlinkDB command interface
@@ -34,4 +42,25 @@ type DeleteCommand struct {
 type AuthCommand struct {
 	username string
 	password string
+}
+
+// ExistCommand represents an EXIST command
+type ExistCommand struct {
+	key []byte
+}
+
+// IncrCommand represents an INCR command
+type IncrCommand struct {
+	key []byte
+}
+
+// DecrCommand represents a DECR command
+type DecrCommand struct {
+	key []byte
+}
+
+// AppendCommand represents an APPEND command
+type AppendCommand struct {
+	key     []byte
+	content []byte
 }

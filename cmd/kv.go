@@ -40,3 +40,12 @@ func (kv *KV) Get(key []byte) ([]byte, bool) {
 func (kv *KV) Auth(username, password string) bool {
 	return username == os.Getenv("USERNAME") && password == os.Getenv("PASSWORD")
 }
+func (kv *KV) Exist(key []byte) (int, error) {
+	kv.mu.RLock()
+	defer kv.mu.RUnlock()
+	_, ok := kv.data[string(key)]
+	if !ok {
+		return 0, nil
+	}
+	return 1, nil
+}

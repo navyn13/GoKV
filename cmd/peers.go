@@ -92,6 +92,18 @@ func (p *Peer) readLoop() error {
 					cmd:  cmd,
 					peer: p,
 				}
+			case CommandExist:
+				if len(v.Array()) != 2 {
+					return fmt.Errorf("invalid number of variables Exist command")
+				}
+				cmd := ExistCommand{
+					key: v.Array()[1].Bytes(),
+				}
+				p.msgCh <- Message{
+					cmd:  cmd,
+					peer: p,
+				}
+
 			default:
 				p.conn.Write([]byte("-ERR unknown command - USE SET, GET, DELETE, AUTH\r\n"))
 			}
