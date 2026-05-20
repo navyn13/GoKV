@@ -45,7 +45,7 @@ func (s *Server) Start() error {
 	}
 	s.ln = ln
 	go s.loop()
-	slog.Info("BlinkDB Server Running", "listenAddr", s.ListenAddr)
+	slog.Info("GoKV Server Running", "listenAddr", s.ListenAddr)
 	return s.acceptLoop()
 }
 
