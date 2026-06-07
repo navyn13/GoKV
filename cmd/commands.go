@@ -15,6 +15,8 @@ const (
 	CommandIncr = "INCR"
 	//commandDecr is the DECR command identifier
 	CommandDecr = "DECR"
+	//commandExpire is the EXPIRE command identifier
+	CommandExpire = "EXPIRE"
 )
 
 // Command represents a BlinkDB command interface
@@ -55,4 +57,10 @@ type IncrCommand struct {
 // DecrCommand represents a DECR command
 type DecrCommand struct {
 	key []byte
+}
+
+// ExpireCommand represents an EXPIRE command
+type ExpireCommand struct {
+	key     []byte
+	seconds int
 }

@@ -86,6 +86,8 @@ func (s *Server) handleMessage(msg Message) error {
 		}
 	case SetCommand:
 		s.kv.Set(v.key, v.val)
+	case ExpireCommand:
+		s.kv.Expire(v.key, v.seconds)
 	case DeleteCommand:
 		s.kv.Delete(v.key)
 	case GetCommand:

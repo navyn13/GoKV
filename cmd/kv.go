@@ -1,6 +1,7 @@
 package gokv
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -47,6 +48,9 @@ func (kv *KV) Get(key []byte) ([]byte, bool) {
 	val, ok := kv.data[string(key)]
 	if !ok {
 		return []byte{}, false
+	}
+	if val.expire.IsZero() {
+		return []byte(val.data), true
 	}
 	if val.expire.Before(time.Now()) {
 		delete(kv.data, string(key))
@@ -98,4 +102,18 @@ func (kv *KV) Decr(key []byte) (int, error) {
 		expire: time.Time{},
 	}
 	return val, nil
+}
+
+func (kv *KV) Expire(key []byte, seconds int) error {
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
+	_, ok := kv.data[string(key)]
+	if !ok {
+		return fmt.Errorf("key not found")
+	}
+	kv.data[string(key)] = value{
+		data:   kv.data[string(key)].data,
+		expire: time.Now().Add(time.Duration(seconds) * time.Second),
+	}
+	return nil
 }

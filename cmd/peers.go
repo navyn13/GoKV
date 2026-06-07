@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 
 	"github.com/tidwall/resp"
 )
@@ -41,6 +42,23 @@ func (p *Peer) readLoop() error {
 			}
 			cmdName := v.Array()[0].String()
 			switch cmdName {
+			case CommandExpire:
+				arr := v.Array()
+				if len(arr) != 3 {
+					return fmt.Errorf("invalid number of variables EXPIRE command")
+				}
+				seconds, err := strconv.Atoi(string(arr[2].Bytes()))
+				if err != nil {
+					return fmt.Errorf("invalid seconds for EXPIRE command")
+				}
+				cmd := ExpireCommand{
+					key:     v.Array()[1].Bytes(),
+					seconds: seconds,
+				}
+				p.msgCh <- Message{
+					cmd:  cmd,
+					peer: p,
+				}
 			case CommandSet:
 				if len(v.Array()) != 3 {
 					return fmt.Errorf("invalid number of variables SET command")
